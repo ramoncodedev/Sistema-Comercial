@@ -5,6 +5,10 @@ import models.Cliente;
 import models.ClientePf;
 import models.ClientePj;
 import models.Produto;
+import service.exceptions.ClienteExisteException;
+import service.exceptions.ClienteNaoExisteException;
+import service.exceptions.ProdutoExisteException;
+import service.exceptions.ProdutoNaoExisteException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,13 +27,21 @@ public class SistemaComercialMap implements SistemaComercial {
     }
 
     @Override
-    public void cadastrarProduto(Produto produto) {
+    public void cadastrarProduto(Produto produto) throws ProdutoExisteException {
+        if (existeProduto(produto.getCodigo())){
+            throw new ProdutoExisteException("Tente novamente, produto já existe");
+        }
+
         mapDeProduto.put(produto.getCodigo(), produto);
 
     }
 
     @Override
-    public Produto pesquisarProdudoPeloCodigo(String codigoProduto) {
+    public Produto pesquisarProdudoPeloCodigo(String codigoProduto) throws ProdutoNaoExisteException {
+        if (!existeProduto(codigoProduto)){
+            throw new ProdutoNaoExisteException("Tente novamente, produto não existe");
+        }
+
         return mapDeProduto.get(codigoProduto);
     }
 
@@ -47,7 +59,11 @@ public class SistemaComercialMap implements SistemaComercial {
     }
 
     @Override
-    public void removerProduto(String codigoProduto) {
+    public void removerProduto(String codigoProduto) throws ProdutoNaoExisteException {
+        if (!existeProduto(codigoProduto)){
+            throw  new ProdutoNaoExisteException("Tente novamente, esse codigo não existe");
+        }
+
         mapDeProduto.remove(codigoProduto);
 
     }
@@ -59,18 +75,27 @@ public class SistemaComercialMap implements SistemaComercial {
     }
 
     @Override
-    public void cadastrarCliente(ClientePf clientePf) {
+    public void cadastrarCliente(ClientePf clientePf) throws ClienteExisteException {
+        if (existeCliente(clientePf.getEmail())){
+            throw new ClienteExisteException("Tente novamente, esse cliente já existe");
+        }
+
         mapaDeClientes.put(clientePf.getEmail(), clientePf);
 
     }
 
     @Override
-    public void cadastrarCliente(ClientePj clientePj) {
+    public void cadastrarCliente(ClientePj clientePj) throws ClienteExisteException {
+        if (existeCliente(clientePj.getEmail())){
+            throw new ClienteExisteException("Tente novamente, esse cliente já existe");
+        }
+
         mapaDeClientes.put(clientePj.getEmail(), clientePj);
     }
 
     @Override
-    public List<Cliente> pesquisarClientePeloNome(String nome) {
+    public List<Cliente> pesquisarClientePeloNome(String nome) throws ClienteNaoExisteException {
+
         List<Cliente> clientePesquisado = new ArrayList<>();
 
         for (Cliente clients : mapaDeClientes.values()){
@@ -78,11 +103,18 @@ public class SistemaComercialMap implements SistemaComercial {
                 clientePesquisado.add(clients);
             }
         }
+        if (clientePesquisado.isEmpty()){
+            throw new ClienteNaoExisteException("Tente novamante, esse cliente não existe");
+        }
         return clientePesquisado;
     }
 
     @Override
-    public void removerCliente(String email) {
+    public void removerCliente(String email) throws ClienteNaoExisteException {
+        if (!existeCliente(email)){
+            throw new ClienteNaoExisteException("Tente novamente, não existe cliente com esse email!");
+        }
+
         mapaDeClientes.remove(email);
 
     }
